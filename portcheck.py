@@ -17,36 +17,56 @@ class color:
   normal = '\033[0m'
 
 # config 
-max_attempts = int(4)
 attempt      = int(1)
-interval     = int(5)
+retries      = int(1)
+interval     = int(1)
 success      = False
 
 # parse our arguments
 parser = argparse.ArgumentParser(description='a script for checking for testing network ports')
-parser.add_argument('--host', type=str, help='hostname or ip address to connect to')
-parser.add_argument('--port', type=int, help='port number to connect to')
+parser.add_argument('--host', type=str, help='hostname or ip address', required=True)
+parser.add_argument('--port', type=int, help='tcp port number', required=True)
+parser.add_argument('--retries', type=int, help='number of times to retry upon failure')
+parser.add_argument('--interval', type=int, help='interval in seconds between retries')
 args = parser.parse_args()
 
+
+# override our default values if provided
+if args.retries:
+  print "setting retries to %d" % (args.retries)
+  retries = args.retries
+
+if args.interval:
+  print "setting interval to %d seconds" % (args.interval)
+  interval = args.interval
+
+
 # check our datatypes
-assert type(args.host) is StringType, "host is not a string: %r" % args.host
-assert type(args.port) is IntType, "port is not an integer: %r" % args.port
+assert type(args.host) is StringType, "host is not a string: %r" % (args.host)
+assert type(args.port) is IntType, "port is not an integer: %r" % (args.port)
+assert type(retries)   is IntType, "retries is not an integer: %r" % (retries)
+assert type(interval)  is IntType, "interval is not an integer: %r" % (interval)
 
 # attempt our connection
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 result = sock.connect_ex((args.host,args.port))
 
-while attempt <= max_attempts: 
-  if result == 0: 
-    print(color.green + "port %d is open on %s (attempt %d of %d)" 
-          % (args.port, args.host, attempt, max_attempts) + color.normal)
+while attempt <= retries: 
+  if result == 0:
     success = True
+    print("tcp/%d on %s" % (args.port, args.host)
+          + color.green
+          + "\topen"
+          + color.normal)
     break
   else:
-    print(color.red + "port %d is not open on %s. will wait %d secs and try again (attempt %d of %d)" 
-          % (args.port, args.host, interval, attempt, max_attempts) + color.normal)
     time.sleep(interval)
     attempt += 1
+    print("tcp/%d on %s" % (args.port, args.host)
+          + color.red
+          + "\tclosed"
+          + color.normal)
+
 
 # and exit
 if success: 
