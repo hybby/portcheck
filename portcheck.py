@@ -54,7 +54,7 @@ result = sock.connect_ex((args.host,args.port))
 while attempt <= retries: 
   if result == 0:
     success = True
-    print("tcp/%d on %s" % (args.port, args.host)
+    print("%s tcp/%d" % (args.host, args.port)
           + color.green
           + "\topen"
           + color.normal)
@@ -62,7 +62,7 @@ while attempt <= retries:
   else:
     time.sleep(interval)
     attempt += 1
-    print("tcp/%d on %s" % (args.port, args.host)
+    print("%s tcp/%d" % (args.host, args.port)
           + color.red
           + "\tclosed"
           + color.normal)
