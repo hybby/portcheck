@@ -20,6 +20,7 @@ class color:
 attempt      = int(1)
 retries      = int(1)
 interval     = int(1)
+timeout      = int(5)
 success      = False
 
 # parse our arguments
@@ -49,6 +50,7 @@ assert type(interval)  is IntType, "interval is not an integer: %r" % (interval)
 
 # attempt our connection
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.settimeout(timeout)
 result = sock.connect_ex((args.host,args.port))
 
 while attempt <= retries: 
